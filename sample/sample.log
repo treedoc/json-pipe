@@ -1,0 +1,5 @@
+2021/01/10 02:34:52.669 INFO [ClientFactory] [Executor-3-1] [message-app] [guid1] First log entry
+{a: 1}, {b: 2}
+2021/01/10 02:34:52.669 DEBUG [ClientFactory] [Executor-3-1] [message-app] [guid2] Second log entry
+2021/01/10 02:34:52.669 WARN [ClientFactory] [Executor-3-1] [message-app] [guid1] Thread log entry
+2021/01/10 02:34:52.669 DEBUG [ClientFactory] [Executor-3-1] [message-app] [guid2] Thread log entrys
