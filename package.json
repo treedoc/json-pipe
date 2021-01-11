@@ -1,11 +1,11 @@
 {
-  "name": "json-pipe",
-  "version": "0.0.1",
+  "name": "json-pipe-ts",
+  "version": "0.0.2",
   "description": "A cli tool to transform JSON stream with javascript input",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
-    "json-pipe": "./index.js"
+    "json-pipe": "./lib/index.js"
   },
   "scripts": {
     "test": "jest --config jestconfig.json",

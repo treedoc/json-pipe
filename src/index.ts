@@ -3,6 +3,7 @@ import { TD, TDJSONParser, TDJSONParserOption, StringCharSource } from "Treedoc"
 import 'process';
 import * as fs from 'fs';
 // import { pipeline } from 'stream/promises'
+/* eslint-disable */
 const { pipeline } = require('stream/promises');
 
 const {Name, Description, Index, ShortName, Required, Examples, Decoder} = CliArgDeco;
@@ -52,7 +53,7 @@ class CliArg {
   help = false;
 }
 
-let m = undefined;
+let m;
 
 class JsonPipe {
   readonly input: NodeJS.ReadStream | fs.ReadStream;
@@ -69,7 +70,7 @@ class JsonPipe {
         this.input,
         this.parseJson.bind(THIS),  // Not sure why this is not bound for generator function
         this.output,
-        //this.handleError,
+        // this.handleError,
       )
     else if (this.arg.fileType === FileType.LOG) {
       await pipeline(
@@ -77,7 +78,7 @@ class JsonPipe {
         this.parseLines.bind(THIS),  // Not sure why this is not bound for generator function
         this.parseLog.bind(THIS),
         this.output,
-        //this.handleError,
+        // this.handleError,
       )
     }
   }
@@ -160,18 +161,20 @@ class JsonPipe {
         lines ++;
       }
     }
-    const obj = this.transformAndToString(logEntry);
-    if (obj)
-      yield obj;
+    const o = this.transformAndToString(logEntry);
+    if (o)
+      yield o;
   }
 
   transformAndToString(_: any) {    
+    /* tslint-disable */
     if (!eval(`${this.arg.filter}`))
       return undefined;
 
     const script = this.arg.map?.indexOf(" return ") > 0  // Wrapper with a function
       ? `(function(){${this.arg.map}})()` : `(${this.arg.map})`;
 
+    /* tslint-disable */
     const obj = eval(script);
     return typeof(obj) === 'string' ? obj + "\n" : JSON.stringify(obj) + "\n";
   }
