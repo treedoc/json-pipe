@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { CliSpec, CliParser, CliArgDeco, EnumValues, EnumsValueOf } from 'cli-arg-deco'
 import { TD, TDJSONParser, TDJSONParserOption, StringCharSource } from "Treedoc"
 import 'process';
@@ -16,10 +17,10 @@ enum FileType { JSON, LOG }
   The expressions are written in Javascript. Current JSON object can be access as variable of '_'.`)
 @Examples([
   "echo '{name: John, age: 10} {name: Alice, age: 30}' | json-pipe '{capitalName: _.name.toToUpperCase()}' -f '_.age<20' ",
-  "cat sample/sample.json | yarn index '`id: ${_.id}`'",
-  "cat sample/sample.json | yarn index '({id: _.id+1, firstName: _.first_name.toUpperCase()})'",
-  "cat sample/sample.json | yarn index -f '_.gender===\"Male\"'",
-  "cat sample/sample.log | yarn index -t LOG -f \"_.guid==='guid1'\"",
+  "cat sample/sample.json | json-pipe '`id: ${_.id}`'",
+  "cat sample/sample.json | json-pipe '({id: _.id+1, firstName: _.first_name.toUpperCase()})'",
+  "cat sample/sample.json | json-pipe -f '_.gender===\"Male\"'",
+  "cat sample/sample.log | json-pipe -t LOG -f \"_.guid==='guid1'\"",
 ])
 class CliArg {
   @Index(0) @Description("Query expression") @Required(false)
