@@ -1,6 +1,6 @@
 <a href="https://github.com/treedoc/json-pipe"><img alt="GitHub Actions status" src="https://github.com/treedoc/json-pipe/workflows/Node%20CI/badge.svg"></a> [![codecov](https://codecov.io/gh/treedoc/json-pipe/branch/master/graph/badge.svg)](https://codecov.io/gh/treedoc/json-pipe)
 
-# JSON-PIPE
+# JSON-PIPE-TS
 
 A CLI tool to filter and transfer a stream of JSON or LOG event into another JSON files using Javascript language syntax
 
@@ -13,9 +13,9 @@ Another project has similar idea is `jsonmap`, but it can only support newline-d
 ## Usage
 
 ### Install & Setup
-- npm install: `npm i --global json-pipe`
+- npm install: `npm i --global json-pipe-ts`
 - run it after installed: `json-pipe -h`
-- npx jons-pipe -h 
+- npx json-pipe-ts -h 
 - Please refer to the help page for the detailed command line options and samples
 
 ## License
