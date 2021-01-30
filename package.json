@@ -1,6 +1,6 @@
 {
   "name": "json-pipe-ts",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A cli tool to transform JSON stream with javascript input",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -47,7 +47,7 @@
   "dependencies": {
     "cli-arg-deco": "^0.0.5",
     "reflect-metadata": "^0.1.13",
-    "treedoc": "^0.3.9"
+    "treedoc": "^0.3.12"
   },
   "files": [
     "lib/**/*"
