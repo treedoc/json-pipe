@@ -13,7 +13,7 @@ const { pipeline } = require('stream/promises');
 import stream = require('stream');
 const {Name, Description, Index, ShortName, Required, Examples, Decoder} = CliArgDeco;
 
-enum FileType { JSON, LOG }
+export enum FileType { JSON, LOG }
 
 @Name("json-pipe") 
 @Description(
@@ -23,12 +23,15 @@ enum FileType { JSON, LOG }
   For map expression, it can return either a string or an object. object will be converted to JSON for the output
   Current JSON object can be access as variable of '_'. If it's a function, the current JSON object will be passed as argument`)
 @Examples([
-  "Simple filter:    echo '{name: John, age: 10} {name: Alice, age: 30}' | json-pipe '{capitalName: _.name.toToUpperCase()}' -f '_.age<20' ",
+  "For the sample data file used, please refer to https://github.com/treedoc/json-pipe/tree/master/sample\n",
+  "Simple filter:    echo '{name: John, age: 10} {name: Alice, age: 30}' | json-pipe '{name: _.name.toToUpperCase()}' -f '_.age<20' ",
   "Map to string:    cat sample/sample.json | json-pipe '`id: ${_.id}`'",
   "With input file:  json-pipe -i sample/sample.json '`id: ${_.id}`'",
   "Map to JSON:      cat sample/sample.json | json-pipe '{id: _.id+1, firstName: _.first_name.toUpperCase()}'",
   "Simple Filter:    cat sample/sample.json | json-pipe -f '_.gender===\"Male\"'",
   "With Imports:     cat sample/sample.json | json-pipe -m sample/test.js -f m.filter m.map",
+  "Mask Fields:      cat sample/sample.json | json-pipe --maskFields .*email,.*name",
+  "Pretty print:     cat sample/sample.json | json-pipe --indentFactor 2",
   "Input Log type:   cat sample/sample.log | json-pipe -t LOG -f \"_.guid==='guid1'\"",
   
 ])
@@ -72,8 +75,11 @@ export class CliArg {
   // For testing only
   setMap(map: string): CliArg { this.map = map; return this; }
   setFilter(filter: string): CliArg { this.filter = filter; return this; }
+  setInputFile(inputFile: string): CliArg { this.inputFile = inputFile; return this; }
+  setFileType(fileType: FileType): CliArg { this.fileType = fileType; return this; }
   setImports(imports: string): CliArg { this.imports = imports; return this; }
   setMaskFields(maskFields: string[]): CliArg { this.maskFields = maskFields; return this; }
+  setIndentFactor(indentFactor: number): CliArg { this.indentFactor = indentFactor; return this; }
 }
 
 let m;
