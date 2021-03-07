@@ -1,6 +1,6 @@
 {
   "name": "json-pipe-ts",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A cli tool to transform JSON stream with javascript input",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

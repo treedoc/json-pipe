@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { CliArgDeco, EnumValues, EnumsValueOf } from 'cli-arg-deco'
 import { TD, TDJSONParser, TDJSONWriterOption, StringCharSource, TDEncodeOption, NodeFilter } from "Treedoc"
 import 'process';

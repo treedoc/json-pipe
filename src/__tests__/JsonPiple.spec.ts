@@ -5,7 +5,8 @@ import path = require('path');
 class StringWritableStream extends stream.Writable {
   public str = "";
   _write(chunk: any, encoding: BufferEncoding, cb?: (error: Error | null | undefined) => void): boolean {
-    cb && cb(null);
+    if (cb)
+      cb(null);
     this.str += chunk;
     return true;
   }
