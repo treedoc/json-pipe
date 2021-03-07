@@ -2,10 +2,10 @@
 console.log('hello')
 
 module.exports = {
-  filter() {
+  filter(_) {
     return _.gender === 'Male';
   },
-  map() {
+  map(_) {
     return {id: _.id+1, firstName: _.first_name.toUpperCase()};
   }
 }

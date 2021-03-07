@@ -2,10 +2,15 @@
 import { CliSpec, CliParser, CliArgDeco, EnumValues, EnumsValueOf } from 'cli-arg-deco'
 import { TD, TDJSONParser, TDJSONParserOption, TDJSONWriterOption, StringCharSource, TDEncodeOption, NodeFilter } from "Treedoc"
 import 'process';
+import 'path';
 import * as fs from 'fs';
+import path = require('path');
+
+// Following statement doesn't compile, not sure why
 // import { pipeline } from 'stream/promises'
 /* eslint-disable */
 const { pipeline } = require('stream/promises');
+
 
 const {Name, Description, Index, ShortName, Required, Examples, Decoder} = CliArgDeco;
 
@@ -14,13 +19,18 @@ enum FileType { JSON, LOG }
 @Name("json-pipe") 
 @Description(
   `Transform an stream of JSON objects or log entries by applying the filter and map expressions. 
-  The expressions are written in Javascript. Current JSON object can be access as variable of '_'.`)
+  The expressions are written in Javascript. Expression could be either a simple expression or a function. 
+  For filter expression, it should return boolean, false means the records should be excluded. 
+  For map expression, it can return either a string or an object. object will be converted to JSON for the output
+  Current JSON object can be access as variable of '_'. If it's a function, the current JSON object will be passed as argument`)
 @Examples([
   "echo '{name: John, age: 10} {name: Alice, age: 30}' | json-pipe '{capitalName: _.name.toToUpperCase()}' -f '_.age<20' ",
   "cat sample/sample.json | json-pipe '`id: ${_.id}`'",
-  "cat sample/sample.json | json-pipe '({id: _.id+1, firstName: _.first_name.toUpperCase()})'",
+  "cat sample/sample.json | json-pipe '{id: _.id+1, firstName: _.first_name.toUpperCase()}'",
   "cat sample/sample.json | json-pipe -f '_.gender===\"Male\"'",
+  "cat sample/sample.json | json-pipe -m sample/test.js -f m.filter m.map",
   "cat sample/sample.log | json-pipe -t LOG -f \"_.guid==='guid1'\"",
+  
 ])
 class CliArg {
   @Index(0) @Description("Query expression") @Required(false)
@@ -173,17 +183,33 @@ class JsonPipe {
       yield o;
   }
 
-  transformAndToString(_: any) {    
-    /* tslint-disable */
-    if (!eval(`${this.arg.filter}`))
+  transformAndToString(_: any) {
+    if (!this.evalScript(this.arg.filter, _))
       return undefined;
 
-    const script = this.arg.map?.indexOf(" return ") > 0  // Wrapper with a function
-      ? `(function(){${this.arg.map}})()` : `(${this.arg.map})`;
-
     /* tslint-disable */
-    const obj = eval(script);
+    const obj = this.evalScript(this.arg.map, _);
     return typeof(obj) === 'string' ? obj + "\n" : this.toJson(obj) + "\n";
+  }
+
+  evalScript(script: string, _: any): any {
+    // console.log(`script=${script}`);
+    let result: any = {}
+    try {
+      /* tslint-disable */
+      result = eval(script);
+    } catch (e: any) {
+      // console.error("Error eval: " + e);
+      script = script.indexOf(" return ") > 0  // Wrapper with a function
+          ? `(function(){${this.arg.map}})()` : `(${this.arg.map})`;
+      /* tslint-disable */
+      result = eval(script);
+    }
+    // console.log(`typeof result=${typeof result}`);
+    if (typeof result === 'function') {
+      result = result(_);
+    }
+    return result;
   }
 
   toJson(obj: any) {
@@ -211,8 +237,7 @@ class JsonPipe {
   }
 
   if (cliArg.imports) {
-    m = require(cliArg.imports);
-    console.log(m);
+    m = require(path.resolve(cliArg.imports));
   }
   await new JsonPipe(cliArg).start();
 })();
