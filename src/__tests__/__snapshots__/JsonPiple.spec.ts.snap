@@ -77,3 +77,8 @@ exports[`JsonPipe With Imports 1`] = `
 {\\"id\\":4,\\"firstName\\":\\"NOELL\\",\\"gender\\":\\"Female\\"}
 "
 `;
+
+exports[`JsonPipe With aggregator 1`] = `
+"{\\"Female\\":2,\\"Male\\":2}
+"
+`;

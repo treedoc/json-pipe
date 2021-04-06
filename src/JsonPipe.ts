@@ -16,19 +16,45 @@ export enum FileType { JSON, LOG }
 
 @Name("json-pipe") 
 @Description(
-  `Transform an stream of JSON objects or log entries by applying the filter and map expressions. 
-  The expressions are written in Javascript. Expression could be either a simple expression or a function. 
-  For filter expression, it should return boolean, false means the records should be excluded. 
-  For map expression, it can return either a string or an object. object will be converted to JSON for the output
+  `Transform an stream of JSON objects or log entries by applying the stateful filter, map or aggregation expressions. 
+  The expressions are written in Javascript. Expression could be either a simple expression or a function. If it's a function, the 
+  function will be called with current json object for the valuation. And function will be cached so that it's possible to keep 
+  the evaluation state in its closure scope.
+  
+  For filter expression, it should return boolean, false means the records should be excluded.
+  For map expression, the return type is: null | boolean | string | object
+    null or false:  means no output for this evaluation
+    true: means output as the input
+    string: will output as is
+    object: will be converted to JSON as output
+  For aggregator function is mostly the same as map function, except following
+    If will take input as null which indicate that's a EOF call, so it will flush out all the remain aggregated data.
+
+  The overall logic is as follow:
+    for(const json in input) {
+      if (!filter(json))
+        continue;
+      const mappedObj = map(json);
+      if (!mappedObj)
+        continue;
+      const aggObj = aggregate(mappedObj);
+      if (aggObj)
+        output(aggObj);
+    }
+    const aggObj = aggregate(null);
+    if (aggObj)
+      output(aggObj);
+  
   Current JSON object can be access as variable of '_'. If it's a function, the current JSON object will be passed as argument`)
 @Examples([
   "For the sample data file used, please refer to https://github.com/treedoc/json-pipe/tree/master/sample\n",
-  "Simple filter:    echo '{name: John, age: 10} {name: Alice, age: 30}' | json-pipe '{name: _.name.toToUpperCase()}' -f '_.age<20' ",
+  "Simple filter:    echo '{name: John, age: 10} {name: Alice, age: 30}' | json-pipe '{name: _.name.toUpperCase()}' -f '_.age<20' ",
   "Map to string:    cat sample/sample.json | json-pipe '`id: ${_.id}`'",
   "With input file:  json-pipe -i sample/sample.json '`id: ${_.id}`'",
   "Map to JSON:      cat sample/sample.json | json-pipe '{id: _.id+1, firstName: _.first_name.toUpperCase()}'",
   "Simple Filter:    cat sample/sample.json | json-pipe -f '_.gender===\"Male\"'",
   "With Imports:     cat sample/sample.json | json-pipe -m sample/test.js -f m.filter m.map",
+  "With aggregator:  cat sample/sample.json | json-pipe -m sample/test.js -a m.aggregate m.map",
   "Mask Fields:      cat sample/sample.json | json-pipe --maskFields .*email,.*name",
   "Pretty print:     cat sample/sample.json | json-pipe --indentFactor 2",
   "Input Log type:   cat sample/sample.log | json-pipe -t LOG -f \"_.guid==='guid1'\"",
@@ -40,6 +66,9 @@ export class CliArg {
 
   @ShortName("f") @Description("Filter expression. if true, it will be included in the output")
   filter = 'true';
+
+  @ShortName("a") @Description("Aggregator expression. if true, it will be included in the output")
+  aggregator = 'true';
 
   @ShortName("i") @Description("Input file instead of stdin")
   inputFile?: string;
@@ -74,6 +103,7 @@ export class CliArg {
   // For testing only
   setMap(map: string): CliArg { this.map = map; return this; }
   setFilter(filter: string): CliArg { this.filter = filter; return this; }
+  setAggregator(aggregator: string): CliArg { this.aggregator = aggregator; return this; }
   setInputFile(inputFile: string): CliArg { this.inputFile = inputFile; return this; }
   setFileType(fileType: FileType): CliArg { this.fileType = fileType; return this; }
   setImports(imports: string): CliArg { this.imports = imports; return this; }
@@ -86,6 +116,7 @@ let m;
 export class JsonPipe {
   readonly input: stream.Readable;
   readonly output: stream.Writable;
+  funcCache: Map<string, (_: any) => any> = new Map();
   constructor(public readonly arg: CliArg, output?: stream.Writable) {
     this.input = this.arg.inputFile ? fs.createReadStream(this.arg.inputFile) : process.stdin;
     this.output = output ? output : this.arg.outputFile ? fs.createWriteStream(this.arg.outputFile) : process.stdout;
@@ -147,6 +178,9 @@ export class JsonPipe {
         }
       }
     }
+    const o = this.aggregateAndToString(null);
+    if (o)
+      yield o;
   }
 
   // transfer chunks to lines
@@ -192,7 +226,7 @@ export class JsonPipe {
         lines ++;
       }
     }
-    const o = this.transformAndToString(logEntry);
+    const o = this.aggregateAndToString(null);
     if (o)
       yield o;
   }
@@ -201,12 +235,24 @@ export class JsonPipe {
     if (!this.evalScript(this.arg.filter, _))
       return undefined;
 
-    /* tslint-disable */
     const obj = this.evalScript(this.arg.map, _);
+    return obj ? this.aggregateAndToString(obj) : undefined;
+  }
+
+  aggregateAndToString(obj: any) {
+    obj = this.evalScript(this.arg.aggregator, obj);
+    return obj ? this.toString(obj) : undefined;
+  }
+
+  private toString(obj: any): string {
     return typeof(obj) === 'string' ? obj + "\n" : this.toJson(obj) + "\n";
   }
 
   evalScript(script: string, _: any): any {
+    const cachedFunc = this.funcCache.get(script);
+    if (cachedFunc)
+      return cachedFunc(_);
+
     // console.log(`script=${script}`);
     let result: any = {}
     try {
@@ -220,10 +266,11 @@ export class JsonPipe {
       result = eval(script);
     }
     // console.log(`typeof result=${typeof result}`);
-    if (typeof result === 'function') {
+    if (typeof result === 'function') {  // Cache the function, so the function could keep state in it's closure
+      this.funcCache.set(script, result);
       result = result(_);
     }
-    return result;
+    return result === true ? _ : result;
   }
 
   toJson(obj: any) {
@@ -234,5 +281,3 @@ export class JsonPipe {
     return TD.stringify(obj, codeOpt)
   }
 }
-
-

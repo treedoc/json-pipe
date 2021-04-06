@@ -40,6 +40,10 @@ describe('JsonPipe', () => {
     await runAndVerifyJsonPipe(new CliArg().setImports("sample/test.js").setFilter('m.filter').setMap('m.map'));
   });
 
+  test('With aggregator', async () => {    
+    await runAndVerifyJsonPipe(new CliArg().setImports("sample/test.js").setMap('m.map').setAggregator('m.aggregate'));
+  });
+
   test('Mask Fields', async () => {    
     await runAndVerifyJsonPipe(new CliArg().setMaskFields([".*email", ".*name"]));
   });
