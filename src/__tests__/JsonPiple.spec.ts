@@ -22,7 +22,7 @@ async function runAndVerifyJsonPipe(arg: CliArg) {
 }
 
 describe('JsonPipe', () => {
-  test('Map to string', async () => {    
+  test('Map to string', async () => {
     const arg = new CliArg();
     arg.map = "`id: ${_.id}`";
     await runAndVerifyJsonPipe(arg);
@@ -41,7 +41,7 @@ describe('JsonPipe', () => {
   });
 
   test('With aggregator', async () => {    
-    await runAndVerifyJsonPipe(new CliArg().setImports("sample/test.js").setMap('m.map').setAggregator('m.aggregate'));
+    await runAndVerifyJsonPipe(new CliArg().setImports("sample/test.js").setAggregator('m.aggregate'));
   });
 
   test('Mask Fields', async () => {    

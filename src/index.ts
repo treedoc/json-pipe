@@ -1,10 +1,19 @@
-#!/usr/bin/env node
+#!/usr/bin/env node -r esm
 import { CliSpec } from 'cli-arg-deco'
 import 'process';
-import 'path';
 import { CliArg, JsonPipe } from './JsonPipe';
+import RemoteImport from 'remote-import';
+
+RemoteImport.get().init({refreshDuration: 20000});
+// RemoteImport.get().init();
+
+// @ts-ignore
+import _ from "https://jspm.dev/lodash";
+_.add(1,2);
 
 (async function main() {
+  
+
   const spec = new CliSpec<CliArg>(CliArg);
   const parser = spec.parse(process.argv, 2);
   const cliArg = parser.target;
@@ -21,4 +30,3 @@ import { CliArg, JsonPipe } from './JsonPipe';
 
   await new JsonPipe(cliArg).start();
 })();
-

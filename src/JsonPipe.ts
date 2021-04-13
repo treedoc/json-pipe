@@ -1,9 +1,11 @@
 import { CliArgDeco, EnumValues, EnumsValueOf } from 'cli-arg-deco'
-import { TD, TDJSONParser, TDJSONWriterOption, StringCharSource, TDEncodeOption, NodeFilter } from "Treedoc"
+import { TD, TDJSONParser, TDJSONWriterOption, StringCharSource, TDEncodeOption, NodeFilter } from "treedoc"
 import 'process';
-import 'path';
+import * as path from 'path';
 import * as fs from 'fs';
-import path = require('path');
+// require = require("esm")(module/*, options*/)
+
+// import { pipeline } from 'stream/promises'
 
 // Following statement doesn't compile, not sure why
 // import { pipeline } from 'stream/promises'
@@ -16,18 +18,59 @@ export enum FileType { JSON, LOG }
 
 @Name("json-pipe") 
 @Description(
-  `Transform an stream of JSON objects or log entries by applying the stateful filter, map or aggregation expressions. 
+  `
+  Transform an stream of JSON objects, or other input formats such as log file or CSV file, by applying a transform script. 
+
+  Script can be performed in two levels: record level scripts and optional entire data set level.
+
+
+  The transform script is written as Javascript expression, which the valuated value can be a simple type of a function as defined: 
+    'null | boolean | object | string | (json: object, raw: string, ctx: object) => null | boolean | object | string'
+  
+  For expression of simple type, the expression will be evaluated for every json record, the json record will be passed as implicit variable of  "_".
+
+  For expression of function type, the function will be called for every json record. The function will be provided with more arguments, including:
+    json: current object (same as _ for expression of simple type)
+    raw:  The raw string of the import
+    ctx: The context stores any state across the script invocations. It can be used for aggregation function to store accumulated data.
+  End of stream invocation
+    If ctx is not any empty object, the function will be called at the end of stream with null json and raw to flush out the accumulated data.
+
+  The return type of both the simple expression or the function will be of:
+    null or false:  means no output for this input. (Aka: filter, negative)
+    true: means output as the input (Aka: filter, positive)
+    string: will output as is  (Aka: map as raw string)
+    object: will be converted to JSON as output  (Aka: map)
+    array: will be spread as multiple records. (Aka: flatMap). 
+
+  The default record level script is: "_", 
+
+  In addition to apply script for each records, it also support options (--dataSetScript -s) of script to apply on entire stream of data as an array of objects. 
+  If this option is provided, all the transformed record will be accumulated into a single array add will be passed into the dataSetScript as the implement variable "_".
+  The output of the datasetScript will be converted to a single JSON object. 
+
+  Module import: 
+  
+  To reuse scripts either by yourself or third party, it's possible to import javascript using option (--imports, -m). The imported modules can be either
+  local files or a remote URL. For local files, it's relative to current directly., The module fils can be either CommonJs Module or ES6 module. Multiple
+  imports separated by ",", every import entry is in the format of [name]:[url], the name can be used in the script. 
+   e.g.
+  --imports m:test.js,loadash:https://jspm.dev/lodash
+
+
+  
+  Transform an stream of JSON objects or log entries by applying the stateful filter, map or aggregation expressions. 
   The expressions are written in Javascript. Expression could be either a simple expression or a function. If it's a function, the 
-  function will be called with current json object for the valuation. And function will be cached so that it's possible to keep 
+  function will be called with current json object for the evaluation. And function will be cached so that it's possible to keep 
   the evaluation state in its closure scope.
   
   For filter expression, it should return boolean, false means the records should be excluded.
   For map expression, the return type is: null | boolean | string | object
-    null or false:  means no output for this evaluation
+    null or false:  means no output for this input
     true: means output as the input
     string: will output as is
     object: will be converted to JSON as output
-  For aggregator function is mostly the same as map function, except following
+  For aggregator function, it's mostly the same as map function, except following
     If will take input as null which indicate that's a EOF call, so it will flush out all the remain aggregated data.
 
   The overall logic is as follow:
@@ -54,11 +97,10 @@ export enum FileType { JSON, LOG }
   "Map to JSON:      cat sample/sample.json | json-pipe '{id: _.id+1, firstName: _.first_name.toUpperCase()}'",
   "Simple Filter:    cat sample/sample.json | json-pipe -f '_.gender===\"Male\"'",
   "With Imports:     cat sample/sample.json | json-pipe -m sample/test.js -f m.filter m.map",
-  "With aggregator:  cat sample/sample.json | json-pipe -m sample/test.js -a m.aggregate m.map",
+  "With aggregator:  cat sample/sample.json | json-pipe -m sample/test.js -a m.aggregate",
   "Mask Fields:      cat sample/sample.json | json-pipe --maskFields .*email,.*name",
   "Pretty print:     cat sample/sample.json | json-pipe --indentFactor 2",
-  "Input Log type:   cat sample/sample.log | json-pipe -t LOG -f \"_.guid==='guid1'\"",
-  
+  "Input Log type:   cat sample/sample.log | json-pipe -t LOG -f \"_.guid==='guid1'\"",  
 ])
 export class CliArg {
   @Index(0) @Description("Query expression") @Required(false)
@@ -122,6 +164,7 @@ export class JsonPipe {
     this.output = output ? output : this.arg.outputFile ? fs.createWriteStream(this.arg.outputFile) : process.stdout;
     if (arg.imports) {
       m = require(path.resolve(arg.imports));
+      console.log(m);
     }  
   }
 
