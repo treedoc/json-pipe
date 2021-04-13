@@ -8,8 +8,8 @@ RemoteImport.get().init({refreshDuration: 20000});
 // RemoteImport.get().init();
 
 // @ts-ignore
-import _ from "https://jspm.dev/lodash";
-_.add(1,2);
+// import _ from "https://jspm.dev/lodash";
+// _.add(1,2);
 
 (async function main() {
   
