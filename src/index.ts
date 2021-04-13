@@ -1,4 +1,4 @@
-#!/usr/bin/env node -r esm
+#!/usr/bin/env node
 import { CliSpec } from 'cli-arg-deco'
 import 'process';
 import { CliArg, JsonPipe } from './JsonPipe';
