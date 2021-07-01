@@ -1,6 +1,6 @@
 {
   "name": "json-pipe-ts",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "A cli tool to transform JSON stream with javascript input",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -18,7 +18,7 @@
     "version": "git add -A src",
     "postversion": "git push && git push --tags",
     "index": "yarn build && node -r esm ./",
-    "index1": "yarn build && node -r esm ./ -i sample/sample.json -m sample/test.js -a m.aggregate"
+    "index1": "yarn build && node -r esm ./ -i sample/sample.json -m sample/test.js -a 'm.aggregate()'"
   },
   "repository": {
     "type": "git",

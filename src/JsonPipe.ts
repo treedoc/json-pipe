@@ -164,7 +164,7 @@ export class JsonPipe {
     this.output = output ? output : this.arg.outputFile ? fs.createWriteStream(this.arg.outputFile) : process.stdout;
     if (arg.imports) {
       m = require(path.resolve(arg.imports));
-      console.log(m);
+      // console.log(m);
     }  
   }
 
@@ -304,7 +304,7 @@ export class JsonPipe {
     } catch (e: any) {
       // console.error("Error eval: " + e);
       script = script.indexOf(" return ") > 0  // Wrapper with a function
-          ? `(function(){${this.arg.map}})()` : `(${this.arg.map})`;
+          ? `(function(){${script}})()` : `(${script})`;
       /* tslint-disable */
       result = eval(script);
     }

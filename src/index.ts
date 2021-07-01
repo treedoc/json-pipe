@@ -12,8 +12,6 @@ RemoteImport.get().init({refreshDuration: 20000});
 // _.add(1,2);
 
 (async function main() {
-  
-
   const spec = new CliSpec<CliArg>(CliArg);
   const parser = spec.parse(process.argv, 2);
   const cliArg = parser.target;
