@@ -142,6 +142,9 @@ export class CliArg {
   @ShortName("h") @Description("Show usage")
   help = false;
 
+  @Description("Explore data in interactive mode")
+  interactive = false;
+
   // For testing only
   setMap(map: string): CliArg { this.map = map; return this; }
   setFilter(filter: string): CliArg { this.filter = filter; return this; }

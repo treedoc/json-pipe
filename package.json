@@ -1,6 +1,6 @@
 {
-  "name": "json-pipe-ts",
-  "version": "0.0.11",
+  "name": "opipe",
+  "version": "0.0.1",
   "description": "A cli tool to transform JSON stream with javascript input",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -37,6 +37,7 @@
   "homepage": "https://github.com/treedoc/json-pipe/#readme",
   "devDependencies": {
     "@types/jest": "^26.0.15",
+    "@types/vorpal": "^1.12.1",
     "codecov": "^3.6.1",
     "jest": "^26.6.3",
     "prettier": "^1.13.2",
@@ -53,7 +54,8 @@
     "reflect-metadata": "^0.1.13",
     "remote-import": "^0.0.4",
     "sync-request": "^6.1.0",
-    "treedoc": "^0.3.12"
+    "treedoc": "^0.3.12",
+    "vorpal": "^1.12.0"
   },
   "files": [
     "lib/**/*"

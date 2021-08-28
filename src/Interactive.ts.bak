@@ -1,0 +1,32 @@
+import { TD, TDJSONParser, TDNode, TreeDoc } from "treedoc";
+import { CliArg } from "./JsonPipe";
+import * as fs from 'fs';
+import Vorpal = require("vorpal");
+
+
+export class Interactive {
+  node: TDNode = new TreeDoc().root;
+
+  constructor(private arg: CliArg) {}
+  start() {
+    if (this.arg.inputFile) 
+      this.loadFile(this.arg.inputFile)
+    
+    const vorpal = new Vorpal();
+    vorpal.command('foo', 'Outputs "bar".')
+    .action(function(args) {
+      console.log('bar');
+      return Promise.resolve();
+    });
+  
+  vorpal
+    .delimiter('myapp$')
+    .show();    
+
+
+  }
+
+  loadFile(fileName: string) {
+    this.node = TDJSONParser.get().parse(fs.readFileSync(fileName).toString());
+  }
+}

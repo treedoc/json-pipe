@@ -3,6 +3,7 @@ import { CliSpec } from 'cli-arg-deco'
 import 'process';
 import { CliArg, JsonPipe } from './JsonPipe';
 import RemoteImport from 'remote-import';
+// import { Interactive } from './Interactive';
 
 RemoteImport.get().init({refreshDuration: 20000});
 // RemoteImport.get().init();
@@ -25,6 +26,9 @@ RemoteImport.get().init({refreshDuration: 20000});
     console.error(spec.printUsage());
     return 0;
   }
+
+  // if (cliArg.interactive)
+  //   new Interactive(cliArg).start();
 
   await new JsonPipe(cliArg).start();
 })();
