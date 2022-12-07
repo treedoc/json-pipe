@@ -55,6 +55,7 @@
     "remote-import": "^0.0.4",
     "sync-request": "^6.1.0",
     "treedoc": "^0.3.12",
+    "tsc": "^2.0.4",
     "vorpal": "^1.12.0"
   },
   "files": [

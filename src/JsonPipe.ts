@@ -216,8 +216,9 @@ export class JsonPipe {
           if (obj) 
             yield obj;
         } catch (e) {
-          console.error(e.name);
-          console.error(e);
+          // Exception is expected, no need to log it
+          // console.error(e.name);
+          // console.error(e);
           break;
         } finally {
           remain = src.str.substring(bookmark.pos);
