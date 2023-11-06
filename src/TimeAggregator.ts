@@ -26,7 +26,7 @@ export class Statistic {
     this.p50 = this.values[Math.floor(this.values.length * 0.5)];
     this.p90 = this.values[Math.floor(this.values.length * 0.9)];
     this.p99 = this.values[Math.floor(this.values.length * 0.99)];
-    // this.values = [];
+    this.values = [];
     return this;
   }
 }
@@ -34,6 +34,11 @@ export class Statistic {
 export class StatisticDataPoint  {
   readonly statistics: {[key: string]: Statistic} = {};
   constructor(public readonly time: number = 0) {
+  }
+
+  public addValue(key: string, val: number) {
+    this.statistics[key] = this.statistics[key] || new Statistic();
+    this.statistics[key].addValue(val);
   }
 
   public calculate(): StatisticDataPoint {
@@ -82,10 +87,10 @@ export class TimeAggregator<T> {
     const classifier = this.extractStringField(data, this.classifier);
     this.dataPoints.forEach(d => {
       const dataValues = this.extractNumberFields(data, this.dataExtractor);
+      d.addValue(classifier, 1);
       for (const key of Object.keys(dataValues)) {
         const dataKey = `${classifier}.${key}`;
-        d.statistics[dataKey] = d.statistics[dataKey] || new Statistic();
-        d.statistics[dataKey].addValue(dataValues[key]);
+        d.addValue(dataKey, dataValues[key]);
       }
     })
     

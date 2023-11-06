@@ -27,7 +27,7 @@ const data2 = [
 
 
 describe('TimeAggregator', () => {
-  const aggregator = new TimeAggregator("time", 10, 1, "value.name", {a: "value.a"});
+  const aggregator = new TimeAggregator("time", 10, 1, "value.name", {a: "value.a", b: "value.b"});
   test('Simple', () => {
     const result: any[] = [];
     data.forEach(d => result.push(...aggregator.onData(d)));

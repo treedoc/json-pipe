@@ -1,6 +1,6 @@
 {
   "name": "opipe",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "A cli tool to transform JSON stream with javascript input",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
