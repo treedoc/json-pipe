@@ -1,6 +1,7 @@
 import stream = require('stream');
 import { CliArg, FileType, JsonPipe } from '../JsonPipe';
 import path = require('path');
+// import { describe, expect, test } from 'vitest';
 
 class StringWritableStream extends stream.Writable {
   public str = "";

@@ -1,11 +1,11 @@
 {
   "name": "opipe",
-  "version": "0.0.2",
+  "version": "0.0.14",
   "description": "A cli tool to transform JSON stream with javascript input",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
-    "json-pipe": "./lib/index.js"
+    "opipe": "./lib/index.js"
   },
   "scripts": {
     "test": "jest --config jestconfig.json",
@@ -48,9 +48,11 @@
   },
   "dependencies": {
     "@types/brotli": "^1.3.0",
+    "@types/lodash": "^4.14.200",
     "brotli": "^1.3.2",
     "cli-arg-deco": "^0.0.5",
     "esm": "^3.2.25",
+    "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
     "remote-import": "^0.0.4",
     "sync-request": "^6.1.0",
